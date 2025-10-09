@@ -92,10 +92,13 @@ h2 {
 /* Table Container */
 .table-container {
   overflow-x: auto;
+  max-height: 600px;
+  overflow-y: auto;
   background: rgba(255,255,255,0.95);
   border-radius: 12px;
   box-shadow: 0 8px 25px rgba(0,0,0,0.15);
   margin-bottom: 30px;
+  position: relative;
 }
 
 /* Table Styling */
@@ -130,7 +133,6 @@ table tbody tr {
 
 table tbody tr:hover { 
   background: rgba(40,167,69,0.08);
-  transform: scale(1.01);
 }
 
 table tbody tr:last-child td {
@@ -205,6 +207,7 @@ h3 {
 
 canvas { 
   background: transparent;
+  max-height: 400px;
 }
 
 /* Loading State */
@@ -262,6 +265,179 @@ canvas {
   }
 }
 
+/* Modal Overlay */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-overlay.active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Modal Container */
+.modal-container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: slideUp 0.3s ease;
+  position: relative;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(40, 167, 69, 0.2);
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: rgba(220, 53, 69, 0.1);
+  border: none;
+  color: #dc3545;
+  font-size: 28px;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  background: #dc3545;
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+/* Modal Content */
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-field {
+  background: rgba(40, 167, 69, 0.05);
+  padding: 15px;
+  border-radius: 12px;
+  border-left: 4px solid #28a745;
+  transition: all 0.3s ease;
+}
+
+.modal-field:hover {
+  background: rgba(40, 167, 69, 0.1);
+  transform: translateX(5px);
+}
+
+.modal-field-label {
+  font-weight: 600;
+  color: #28a745;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-field-label i {
+  font-size: 16px;
+}
+
+.modal-field-value {
+  color: #333;
+  font-size: 15px;
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+.modal-field-value.long-text {
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.pending {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+  color: #fff;
+}
+
+.status-badge.converted {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #fff;
+}
+
+/* View Button */
+button.view-btn {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  color: #fff;
+}
+
+button.view-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(23, 162, 184, 0.4);
+}
+
 /* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 8px;
@@ -280,6 +456,31 @@ canvas {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #218838;
+}
+
+/* Modal Scrollbar */
+.modal-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-container::-webkit-scrollbar-thumb {
+  background: rgba(40, 167, 69, 0.5);
+}
+
+/* Responsive Modal */
+@media(max-width: 768px) {
+  .modal-container {
+    padding: 20px;
+    max-height: 90vh;
+  }
+  
+  .modal-header h3 {
+    font-size: 20px;
+  }
+  
+  .modal-field {
+    padding: 12px;
+  }
 }
 </style>
 </head>
@@ -333,6 +534,19 @@ canvas {
   </div>
 </div>
 
+<!-- Modal Popup -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3>📋 Inquiry Details</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-content" id="modalContent">
+      <!-- Content will be dynamically inserted here -->
+    </div>
+  </div>
+</div>
+
 <script>
 // Firebase Config
 const firebaseConfig = {
@@ -362,8 +576,15 @@ const exportBtn = document.getElementById("exportCSV");
 let lineChart, pieChart;
 
 // Fetch leads from Firestore
+let unsubscribe = null;
+
 function fetchLeads() {
-  db.collection("contacts")
+  // Unsubscribe from previous listener if exists
+  if (unsubscribe) {
+    unsubscribe();
+  }
+  
+  unsubscribe = db.collection("contacts")
     .orderBy("timestamp", "desc")
     .onSnapshot(snapshot => {
       leadsData = [];
@@ -410,6 +631,7 @@ function renderTable(data) {
         </select>
       </td>
       <td>
+        <button class="action-btn view-btn" onclick="viewLead('${lead.id}')">View</button>
         <button class="action-btn converted-btn" onclick="updateStatus('${lead.id}', 'converted')">Convert</button>
         <button class="action-btn delete-btn" onclick="deleteLead('${lead.id}')">Delete</button>
       </td>
@@ -659,6 +881,107 @@ function renderCharts(data) {
 
 // Initialize app
 fetchLeads();
+
+// View lead details in modal
+function viewLead(id) {
+  const lead = leadsData.find(l => l.id === id);
+  if (!lead) return;
+  
+  const date = lead.timestamp 
+    ? new Date(lead.timestamp.seconds * 1000).toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    : "N/A";
+  
+  const modalContent = document.getElementById('modalContent');
+  modalContent.innerHTML = `
+    <div class="modal-field">
+      <div class="modal-field-label">
+        <i class="las la-user"></i>
+        Full Name
+      </div>
+      <div class="modal-field-value">${escapeHtml(lead.name || 'N/A')}</div>
+    </div>
+    
+    <div class="modal-field">
+      <div class="modal-field-label">
+        <i class="las la-envelope"></i>
+        Email Address
+      </div>
+      <div class="modal-field-value">${escapeHtml(lead.email || 'N/A')}</div>
+    </div>
+    
+    <div class="modal-field">
+      <div class="modal-field-label">
+        <i class="las la-phone"></i>
+        Phone Number
+      </div>
+      <div class="modal-field-value">${escapeHtml(lead.number || 'N/A')}</div>
+    </div>
+    
+    <div class="modal-field">
+      <div class="modal-field-label">
+        <i class="las la-tag"></i>
+        Subject
+      </div>
+      <div class="modal-field-value">${escapeHtml(lead.subject || 'N/A')}</div>
+    </div>
+    
+    <div class="modal-field">
+      <div class="modal-field-label">
+        <i class="las la-comment"></i>
+        Message
+      </div>
+      <div class="modal-field-value long-text">${escapeHtml(lead.message || 'No message provided')}</div>
+    </div>
+    
+    <div class="modal-field">
+      <div class="modal-field-label">
+        <i class="las la-calendar"></i>
+        Submission Date
+      </div>
+      <div class="modal-field-value">${date}</div>
+    </div>
+    
+    <div class="modal-field">
+      <div class="modal-field-label">
+        <i class="las la-info-circle"></i>
+        Status
+      </div>
+      <div class="modal-field-value">
+        <span class="status-badge ${lead.status}">${lead.status}</span>
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('modalOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+// Close modal
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+  document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeModal();
+  }
+});
+
+// Close modal with ESC key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeModal();
+  }
+});
 </script>
 
 </body>
