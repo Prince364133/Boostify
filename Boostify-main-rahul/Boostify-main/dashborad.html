@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boostify Admin Dashboard</title>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/line-awesome@1.3.0/dist/line-awesome/css/line-awesome.min.css">
+
+<style>
+/* General Reset */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+  font-family: 'Roboto', sans-serif; 
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px 0;
+}
+
+/* Container */
+.container { 
+  max-width: 1400px; 
+  margin: auto; 
+  padding: 20px; 
+}
+
+/* Heading */
+h2 { 
+  text-align: center; 
+  margin-bottom: 30px; 
+  font-weight: 700; 
+  color: #fff;
+  font-size: 32px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Filters */
+.filters { 
+  display: flex; 
+  flex-wrap: wrap; 
+  gap: 15px; 
+  margin-bottom: 25px;
+  padding: 20px;
+  background: rgba(255,255,255,0.95);
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.filters input, .filters select, .filters button {
+  padding: 12px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+  transition: all 0.3s ease;
+  font-family: 'Roboto', sans-serif;
+}
+
+.filters input:focus, .filters select:focus { 
+  border-color: #28a745; 
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(40,167,69,0.1);
+}
+
+/* Buttons */
+.filters button {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: 0.3s;
+  box-shadow: 0 4px 12px rgba(40,167,69,0.3);
+}
+
+.filters button:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(40,167,69,0.4);
+}
+
+.filters button:active {
+  transform: translateY(0);
+}
+
+/* Table Container */
+.table-container {
+  overflow-x: auto;
+  max-height: 600px;
+  overflow-y: auto;
+  background: rgba(255,255,255,0.95);
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  margin-bottom: 30px;
+  position: relative;
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th, table td {
+  padding: 16px 12px;
+  text-align: left;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #eee;
+}
+
+table th { 
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #fff; 
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+table tbody tr {
+  transition: all 0.2s ease;
+}
+
+table tbody tr:hover { 
+  background: rgba(40,167,69,0.08);
+}
+
+table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Status Dropdown */
+table select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+table select:focus {
+  outline: none;
+  border-color: #28a745;
+  box-shadow: 0 0 0 3px rgba(40,167,69,0.1);
+}
+
+/* Action Buttons */
+button.action-btn {
+  padding: 8px 14px;
+  margin-right: 5px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s;
+  font-size: 13px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+button.delete-btn { 
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: #fff;
+}
+
+button.delete-btn:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(220,53,69,0.4);
+}
+
+button.converted-btn { 
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #fff;
+}
+
+button.converted-btn:hover { 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(40,167,69,0.4);
+}
+
+/* Charts Section */
+.chart-container {
+  background: rgba(255,255,255,0.95);
+  border-radius: 12px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+h3 { 
+  margin-bottom: 20px;
+  color: #333;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+canvas { 
+  background: transparent;
+  max-height: 400px;
+}
+
+/* Loading State */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #fff;
+  font-size: 18px;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.empty-state i {
+  font-size: 64px;
+  margin-bottom: 20px;
+  color: #ccc;
+}
+
+/* Responsive */
+@media(max-width: 992px) { 
+  .filters { 
+    flex-direction: column;
+  }
+  
+  .filters input,
+  .filters select,
+  .filters button {
+    width: 100%;
+  }
+}
+
+@media(max-width: 768px) { 
+  h2 {
+    font-size: 24px;
+  }
+  
+  table th, table td { 
+    font-size: 12px; 
+    padding: 10px 8px;
+  }
+  
+  button.action-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    margin-bottom: 5px;
+  }
+  
+  .chart-container {
+    padding: 15px;
+  }
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-overlay.active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Modal Container */
+.modal-container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: slideUp 0.3s ease;
+  position: relative;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Modal Header */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid rgba(40, 167, 69, 0.2);
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: rgba(220, 53, 69, 0.1);
+  border: none;
+  color: #dc3545;
+  font-size: 28px;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  background: #dc3545;
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+/* Modal Content */
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-field {
+  background: rgba(40, 167, 69, 0.05);
+  padding: 15px;
+  border-radius: 12px;
+  border-left: 4px solid #28a745;
+  transition: all 0.3s ease;
+}
+
+.modal-field:hover {
+  background: rgba(40, 167, 69, 0.1);
+  transform: translateX(5px);
+}
+
+.modal-field-label {
+  font-weight: 600;
+  color: #28a745;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modal-field-label i {
+  font-size: 16px;
+}
+
+.modal-field-value {
+  color: #333;
+  font-size: 15px;
+  line-height: 1.6;
+  word-wrap: break-word;
+}
+
+.modal-field-value.long-text {
+  max-height: 200px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+/* Status Badge */
+.status-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.status-badge.pending {
+  background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+  color: #fff;
+}
+
+.status-badge.converted {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #fff;
+}
+
+/* View Button */
+button.view-btn {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  color: #fff;
+}
+
+button.view-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(23, 162, 184, 0.4);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #28a745;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #218838;
+}
+
+/* Modal Scrollbar */
+.modal-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-container::-webkit-scrollbar-thumb {
+  background: rgba(40, 167, 69, 0.5);
+}
+
+/* Responsive Modal */
+@media(max-width: 768px) {
+  .modal-container {
+    padding: 20px;
+    max-height: 90vh;
+  }
+  
+  .modal-header h3 {
+    font-size: 20px;
+  }
+  
+  .modal-field {
+    padding: 12px;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Boostify Admin Dashboard</h2>
+
+  <!-- Filters -->
+  <div class="filters">
+    <input type="text" id="searchInput" placeholder="🔍 Search Name / Email / Subject">
+    <input type="date" id="startDate" title="Start Date">
+    <input type="date" id="endDate" title="End Date">
+    <select id="statusFilter">
+      <option value="all">All Status</option>
+      <option value="pending">Pending</option>
+      <option value="converted">Converted</option>
+    </select>
+    <button id="applyFilter">Apply Filter</button>
+    <button id="exportCSV">Export CSV</button>
+  </div>
+
+  <!-- Leads Table -->
+  <div class="table-container">
+    <table id="leadsTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Number</th>
+          <th>Subject</th>
+          <th>Message</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Charts -->
+  <div class="chart-container">
+    <h3>📈 Leads Over Time</h3>
+    <canvas id="lineChart" height="100"></canvas>
+  </div>
+  
+  <div class="chart-container">
+    <h3>📊 Lead Conversion</h3>
+    <canvas id="pieChart" height="100"></canvas>
+  </div>
+</div>
+
+<!-- Modal Popup -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3>📋 Inquiry Details</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-content" id="modalContent">
+      <!-- Content will be dynamically inserted here -->
+    </div>
+  </div>
+</div>
+
+<script>
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyDUmlglBLyPh_isG9hw7MrDBuFyCM2HuYA",
+  authDomain: "rahul-bhaiya-1440c.firebaseapp.com",
+  projectId: "rahul-bhaiya-1440c",
+  storageBucket: "rahul-bhaiya-1440c.firebasestorage.app",
+  messagingSenderId: "672871538187",
+  appId: "1:672871538187:web:0546ebee1834a5eeb3f10e",
+  measurementId: "G-LS0LR90XKN"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Global variables
+let leadsData = [];
+const tableBody = document.querySelector("#leadsTable tbody");
+const searchInput = document.getElementById("searchInput");
+const startDate = document.getElementById("startDate");
+const endDate = document.getElementById("endDate");
+const statusFilter = document.getElementById("statusFilter");
+const applyFilterBtn = document.getElementById("applyFilter");
+const exportBtn = document.getElementById("exportCSV");
+
+let lineChart, pieChart;
+
+// Fetch leads from Firestore
+let unsubscribe = null;
+
+function fetchLeads() {
+  // Unsubscribe from previous listener if exists
+  if (unsubscribe) {
+    unsubscribe();
+  }
+  
+  unsubscribe = db.collection("contacts")
+    .orderBy("timestamp", "desc")
+    .onSnapshot(snapshot => {
+      leadsData = [];
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        data.id = doc.id;
+        if (!data.status) data.status = "pending";
+        leadsData.push(data);
+      });
+      renderTable(leadsData);
+      renderCharts(leadsData);
+    }, error => {
+      console.error("Error fetching leads:", error);
+      showEmptyState("Error loading data. Please refresh the page.");
+    });
+}
+
+// Render Table
+function renderTable(data) {
+  tableBody.innerHTML = "";
+  
+  if (data.length === 0) {
+    showEmptyState("No leads found matching your criteria.");
+    return;
+  }
+  
+  data.forEach(lead => {
+    const tr = document.createElement("tr");
+    const date = lead.timestamp 
+      ? new Date(lead.timestamp.seconds * 1000).toLocaleString() 
+      : "N/A";
+    
+    tr.innerHTML = `
+      <td>${escapeHtml(lead.name || '')}</td>
+      <td>${escapeHtml(lead.email || '')}</td>
+      <td>${escapeHtml(lead.number || '')}</td>
+      <td>${escapeHtml(lead.subject || '')}</td>
+      <td>${escapeHtml(lead.message || '').substring(0, 50)}${lead.message && lead.message.length > 50 ? '...' : ''}</td>
+      <td>${date}</td>
+      <td>
+        <select onchange="updateStatus('${lead.id}', this.value)">
+          <option value="pending" ${lead.status === 'pending' ? 'selected' : ''}>Pending</option>
+          <option value="converted" ${lead.status === 'converted' ? 'selected' : ''}>Converted</option>
+        </select>
+      </td>
+      <td>
+        <button class="action-btn view-btn" onclick="viewLead('${lead.id}')">View</button>
+        <button class="action-btn converted-btn" onclick="updateStatus('${lead.id}', 'converted')">Convert</button>
+        <button class="action-btn delete-btn" onclick="deleteLead('${lead.id}')">Delete</button>
+      </td>
+    `;
+    tableBody.appendChild(tr);
+  });
+}
+
+// Escape HTML to prevent XSS
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// Show empty state
+function showEmptyState(message) {
+  tableBody.innerHTML = `
+    <tr>
+      <td colspan="8" class="empty-state">
+        <i class="las la-inbox"></i>
+        <p>${message}</p>
+      </td>
+    </tr>
+  `;
+}
+
+// Apply Filters
+applyFilterBtn.addEventListener("click", () => {
+  const searchValue = searchInput.value.toLowerCase().trim();
+  const statusValue = statusFilter.value;
+  const startValue = startDate.value;
+  const endValue = endDate.value;
+  
+  const filtered = leadsData.filter(lead => {
+    // Text search
+    const textMatch = !searchValue || 
+      (lead.name && lead.name.toLowerCase().includes(searchValue)) ||
+      (lead.email && lead.email.toLowerCase().includes(searchValue)) ||
+      (lead.subject && lead.subject.toLowerCase().includes(searchValue));
+    
+    // Status filter
+    const statusMatch = statusValue === 'all' || lead.status === statusValue;
+    
+    // Date range filter
+    let startMatch = true;
+    let endMatch = true;
+    
+    if (startValue && lead.timestamp) {
+      const leadDate = new Date(lead.timestamp.seconds * 1000);
+      const filterStartDate = new Date(startValue);
+      filterStartDate.setHours(0, 0, 0, 0);
+      startMatch = leadDate >= filterStartDate;
+    }
+    
+    if (endValue && lead.timestamp) {
+      const leadDate = new Date(lead.timestamp.seconds * 1000);
+      const filterEndDate = new Date(endValue);
+      filterEndDate.setHours(23, 59, 59, 999);
+      endMatch = leadDate <= filterEndDate;
+    }
+    
+    return textMatch && statusMatch && startMatch && endMatch;
+  });
+  
+  renderTable(filtered);
+  renderCharts(filtered);
+});
+
+// Update lead status
+function updateStatus(id, status) {
+  db.collection("contacts")
+    .doc(id)
+    .update({ status })
+    .catch(error => {
+      console.error("Error updating status:", error);
+      alert("Failed to update status. Please try again.");
+    });
+}
+
+// Delete lead
+function deleteLead(id) {
+  if (confirm("Are you sure you want to delete this lead? This action cannot be undone.")) {
+    db.collection("contacts")
+      .doc(id)
+      .delete()
+      .catch(error => {
+        console.error("Error deleting lead:", error);
+        alert("Failed to delete lead. Please try again.");
+      });
+  }
+}
+
+// Export to CSV
+exportBtn.addEventListener("click", () => {
+  if (leadsData.length === 0) {
+    alert("No data to export.");
+    return;
+  }
+  
+  let csv = "Name,Email,Number,Subject,Message,Date,Status\n";
+  leadsData.forEach(lead => {
+    const date = lead.timestamp 
+      ? new Date(lead.timestamp.seconds * 1000).toLocaleString() 
+      : "";
+    csv += `"${(lead.name || '').replace(/"/g, '""')}","${(lead.email || '').replace(/"/g, '""')}","${(lead.number || '').replace(/"/g, '""')}","${(lead.subject || '').replace(/"/g, '""')}","${(lead.message || '').replace(/"/g, '""')}","${date}","${lead.status}"\n`;
+  });
+  
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `boostify_leads_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+// Render Charts
+function renderCharts(data) {
+  const pending = data.filter(d => d.status === 'pending').length;
+  const converted = data.filter(d => d.status === 'converted').length;
+
+  // Pie Chart - Lead Conversion
+  const pieCtx = document.getElementById("pieChart").getContext("2d");
+  if (pieChart) pieChart.destroy();
+  pieChart = new Chart(pieCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Pending', 'Converted'],
+      datasets: [{
+        data: [pending, converted],
+        backgroundColor: ['#ffc107', '#28a745'],
+        borderWidth: 3,
+        borderColor: '#fff',
+        hoverOffset: 15
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { 
+          position: 'bottom',
+          labels: {
+            padding: 20,
+            font: {
+              size: 14,
+              weight: 500
+            }
+          }
+        },
+        tooltip: { 
+          enabled: true,
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.parsed || 0;
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const percentage = ((value / total) * 100).toFixed(1);
+              return `${label}: ${value} (${percentage}%)`;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // Line Chart - Leads Over Time
+  const dateMap = {};
+  data.forEach(lead => {
+    if (lead.timestamp) {
+      const date = new Date(lead.timestamp.seconds * 1000).toLocaleDateString();
+      dateMap[date] = (dateMap[date] || 0) + 1;
+    }
+  });
+
+  const sortedDates = Object.keys(dateMap).sort((a, b) => new Date(a) - new Date(b));
+  const labels = sortedDates;
+  const values = sortedDates.map(date => dateMap[date]);
+
+  const lineCtx = document.getElementById("lineChart").getContext("2d");
+  if (lineChart) lineChart.destroy();
+  lineChart = new Chart(lineCtx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Leads per Day',
+        data: values,
+        borderColor: '#28a745',
+        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+        tension: 0.4,
+        fill: true,
+        pointRadius: 6,
+        pointHoverRadius: 8,
+        pointBackgroundColor: '#28a745',
+        pointBorderColor: '#fff',
+        pointBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { 
+          display: true, 
+          position: 'top',
+          labels: {
+            padding: 20,
+            font: {
+              size: 14,
+              weight: 500
+            }
+          }
+        },
+        tooltip: { 
+          enabled: true,
+          mode: 'index',
+          intersect: false
+        }
+      },
+      scales: {
+        x: { 
+          grid: { display: false },
+          ticks: {
+            font: {
+              size: 12
+            }
+          }
+        },
+        y: { 
+          beginAtZero: true,
+          grid: { color: 'rgba(0, 0, 0, 0.05)' },
+          ticks: {
+            stepSize: 1,
+            font: {
+              size: 12
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// Initialize app
+fetchLeads();
+
+// View lead details in modal
+function viewLead(id) {
+  const lead = leadsData.find(l => l.id === id);
+  if (!lead) return;
+  
+  const date = lead.timestamp 
+    ? new Date(lead.timestamp.seconds * 1000).toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    : "N/A";
+  
+  const modalContent = document.getElementById('modalContent');
+  modalContent.innerHTML = `
+    <div class="modal-field">
+      <div class="modal-field-label">
+        <i class="las la-user"></i>
+        Full Name
+      </div>
+      <div class="modal-field-value">${escapeHtml(lead.name || 'N/A')}</div>
+    </div>
+    
+    <div class="modal-field">
+      <div class="modal-field-label">
+        <i class="las la-envelope"></i>
+        Email Address
+      </div>
+      <div class="modal-field-value">${escapeHtml(lead.email || 'N/A')}</div>
+    </div>
+    
+    <div class="modal-field">
+      <div class="modal-field-label">
+        <i class="las la-phone"></i>
+        Phone Number
+      </div>
+      <div class="modal-field-value">${escapeHtml(lead.number || 'N/A')}</div>
+    </div>
+    
+    <div class="modal-field">
+      <div class="modal-field-label">
+        <i class="las la-tag"></i>
+        Subject
+      </div>
+      <div class="modal-field-value">${escapeHtml(lead.subject || 'N/A')}</div>
+    </div>
+    
+    <div class="modal-field">
+      <div class="modal-field-label">
+        <i class="las la-comment"></i>
+        Message
+      </div>
+      <div class="modal-field-value long-text">${escapeHtml(lead.message || 'No message provided')}</div>
+    </div>
+    
+    <div class="modal-field">
+      <div class="modal-field-label">
+        <i class="las la-calendar"></i>
+        Submission Date
+      </div>
+      <div class="modal-field-value">${date}</div>
+    </div>
+    
+    <div class="modal-field">
+      <div class="modal-field-label">
+        <i class="las la-info-circle"></i>
+        Status
+      </div>
+      <div class="modal-field-value">
+        <span class="status-badge ${lead.status}">${lead.status}</span>
+      </div>
+    </div>
+  `;
+  
+  document.getElementById('modalOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+// Close modal
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+  document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closeModal();
+  }
+});
+
+// Close modal with ESC key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    closeModal();
+  }
+});
+</script>
+
+</body>
+</html>
